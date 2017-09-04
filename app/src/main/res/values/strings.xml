@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Playground</string>
+    <string name="action_filter">Filter</string>
+    <string name="title_add_item">Add dataItem</string>
+    <string name="title_filter">Select filter</string>
+    <string name="hint_name">Name</string>
+    <string name="hint_count">Count</string>
+    <string name="filter_option_0">All</string>
+    <string name="filter_option_1">Name equal to First and Count from 5 to 10</string>
+    <string name="filter_option_2">Name not equal to Second or Count from 7 to 15</string>
+    <string name="filter_option_3">Name equal to Third or (Count not from 13 to 22 and Name equal to Fourth)</string>
+</resources>

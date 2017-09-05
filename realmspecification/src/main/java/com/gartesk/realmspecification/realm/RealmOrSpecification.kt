@@ -1,4 +1,4 @@
-package com.gartesk.playground.data.specification
+package com.gartesk.realmspecification.realm
 
 import io.realm.RealmModel
 import io.realm.RealmQuery

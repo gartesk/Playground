@@ -13,29 +13,30 @@ import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.RadioGroup
+import com.gartesk.playground.PlaygroundApplication
 import com.gartesk.playground.R
-import com.gartesk.playground.data.RealmDataStorage
-import com.gartesk.playground.data.entity.DataItem
-import com.gartesk.playground.data.specification.RealmSpecification
-import com.gartesk.playground.data.specification.RealmTrueSpecification
-import com.gartesk.playground.data.specification.implementation.RealmItemCountBetweenSpecification
-import com.gartesk.playground.data.specification.implementation.RealmItemNameSpecification
+import com.gartesk.playground.domain.command.DataItemsCommand
+import com.gartesk.playground.domain.model.DataItem
+import com.gartesk.playground.domain.specification.DataItemCountBetweenSpecification
+import com.gartesk.playground.domain.specification.DataItemNameSpecification
+import com.gartesk.realmspecification.Specification
+import com.gartesk.realmspecification.TrueSpecification
 
 class MainActivity : AppCompatActivity() {
 
-    private var realmDataStorage: RealmDataStorage? = null
+    private var dataItemsCommand: DataItemsCommand? = null
     private var adapter: DataItemsAdapter? = null
 
-    private val specifications: List<RealmSpecification<DataItem>> = listOf(RealmTrueSpecification(),
-            RealmItemNameSpecification("First").and(RealmItemCountBetweenSpecification(5, 10)),
-            RealmItemNameSpecification("Second").not().or(RealmItemCountBetweenSpecification(7, 15)),
-            RealmItemNameSpecification("Third").or(RealmItemCountBetweenSpecification(7, 15).not()
-                    .and(RealmItemNameSpecification("Fourth"))))
+    private val specifications: List<Specification<DataItem>> = listOf(TrueSpecification<DataItem>(),
+            DataItemNameSpecification("First").and(DataItemCountBetweenSpecification(5, 10)),
+            DataItemNameSpecification("Second").not().or(DataItemCountBetweenSpecification(7, 15)),
+            DataItemNameSpecification("Third").or(DataItemCountBetweenSpecification(7, 15).not()
+                    .and(DataItemNameSpecification("Fourth"))))
     private var currentSpecificationIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        realmDataStorage = RealmDataStorage(this)
+        dataItemsCommand = (application as PlaygroundApplication).createDataItemsCommand()
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar) as Toolbar)
         findViewById(R.id.fab).setOnClickListener {
@@ -46,12 +47,6 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
         refreshAdapterData()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        adapter?.dataItems = null
-        realmDataStorage?.close()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -71,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refreshAdapterData() {
-        adapter?.dataItems = realmDataStorage?.getItems(specifications[currentSpecificationIndex])
+        adapter?.dataItems = dataItemsCommand?.getDataItems(specifications[currentSpecificationIndex])
     }
 
     private fun showItemCreationDialog() {
@@ -88,7 +83,7 @@ class MainActivity : AppCompatActivity() {
                         count = Integer.parseInt(countEditText.text.toString())
                     } catch (numberFormatException: NumberFormatException) {
                     }
-                    realmDataStorage?.saveItem(DataItem(name, count))
+                    dataItemsCommand?.saveDataItem(DataItem(name, count))
                     refreshAdapterData()
                 })
                 .create()

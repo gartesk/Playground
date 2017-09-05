@@ -2,6 +2,12 @@
 
 buildscript {
     ext.kotlin_version = '1.1.4-3'
+    ext.supportLibraryVersion = "26.0.0-alpha1"
+    ext.buildToolsVersion = "26.0.1"
+    ext.compileSdkVersion = 26
+    ext.targetSdkVersion = 26
+    ext.minSdkVersion = 21
+
     repositories {
         jcenter()
     }
@@ -15,6 +21,9 @@ buildscript {
 allprojects {
     repositories {
         jcenter()
+        maven {
+            url "https://nexus.eastbanctech.ru/content/repositories/releases/"
+        }
     }
 }
 

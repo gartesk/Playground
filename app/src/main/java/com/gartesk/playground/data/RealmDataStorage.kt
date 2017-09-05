@@ -1,14 +1,18 @@
 package com.gartesk.playground.data
 
 import android.content.Context
-import com.gartesk.playground.data.entity.DataItem
-import com.gartesk.playground.data.specification.RealmSpecification
+import com.gartesk.playground.data.entity.RealmDataItem
+import com.gartesk.playground.data.mapper.RealmDataItemSpecificationMapper
+import com.gartesk.playground.data.mapper.RealmDataMapper
+import com.gartesk.playground.domain.model.DataItem
+import com.gartesk.realmspecification.Specification
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
-class RealmDataStorage(context: Context) {
+class RealmDataStorage(context: Context) : DataStorage {
 
-    private val realm: Realm
+    private val realmDataMapper: RealmDataMapper = RealmDataMapper()
+    private val realmDataItemSpecificationMapper = RealmDataItemSpecificationMapper()
 
     init {
         Realm.init(context)
@@ -18,17 +22,38 @@ class RealmDataStorage(context: Context) {
                 .build()
         Realm.deleteRealm(realmConfiguration)
         Realm.setDefaultConfiguration(realmConfiguration)
-        realm = Realm.getDefaultInstance()
     }
 
-    fun saveItem(dataItem: DataItem) {
-        realm.executeTransaction { transactionRealm -> transactionRealm.copyToRealm(dataItem) }
+    override fun saveItem(dataItem: DataItem) {
+        val realmDataItem = realmDataMapper.mapToRealm(dataItem)
+        var realm: Realm? = null
+        try {
+            realm = Realm.getDefaultInstance()
+            realm.executeTransaction { transactionRealm -> transactionRealm.copyToRealm(realmDataItem) }
+        } finally {
+            try {
+                realm?.close()
+            } catch (throwable: Throwable) {
+            }
+        }
     }
 
-    fun getItems(specification: RealmSpecification<DataItem>): List<DataItem> =
-            specification.apply(realm.where(DataItem::class.java)).findAll()
-
-    fun close() {
-        realm.close()
+    override fun getItems(specification: Specification<DataItem>): List<DataItem> {
+        var realm: Realm? = null
+        try {
+            realm = Realm.getDefaultInstance()
+            val results: MutableList<DataItem> = mutableListOf()
+            realm.executeTransaction { transactionRealm ->
+                results.addAll(realmDataItemSpecificationMapper.map(specification)!!
+                        .apply(transactionRealm.where(RealmDataItem::class.java)).findAll()
+                        .map { realmDataItem -> realmDataMapper.mapFromRealm(realmDataItem) })
+            }
+            return results
+        } finally {
+            try {
+                realm?.close()
+            } catch (throwable: Throwable) {
+            }
+        }
     }
 }

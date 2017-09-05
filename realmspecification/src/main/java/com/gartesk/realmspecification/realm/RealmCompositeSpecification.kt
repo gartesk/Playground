@@ -1,11 +1,8 @@
-package com.gartesk.playground.data.specification
+package com.gartesk.realmspecification.realm
 
 import io.realm.RealmModel
-import io.realm.RealmQuery
 
 abstract class RealmCompositeSpecification<T : RealmModel> : RealmSpecification<T> {
-
-    abstract override fun apply(query: RealmQuery<T>): RealmQuery<T>
 
     override fun and(other: RealmSpecification<T>): RealmSpecification<T> =
             RealmAndSpecification(this, other)

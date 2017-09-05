@@ -2,9 +2,9 @@ package com.gartesk.playground.view
 
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
-import com.gartesk.playground.data.entity.DataItem
 import android.view.LayoutInflater
 import com.gartesk.playground.R
+import com.gartesk.playground.domain.model.DataItem
 
 class DataItemsAdapter
     : RecyclerView.Adapter<DataItemViewHolder>() {
